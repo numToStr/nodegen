@@ -1,5 +1,5 @@
 {
-    "name": "create-node-app",
+    "name": "@realvikas/create-node-app",
     "version": "1.0.0",
     "description": "A CLI tool for creating node app",
     "main": "bin/www.js",
