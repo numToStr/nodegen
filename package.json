@@ -28,5 +28,8 @@
     "bugs": {
         "url": "https://github.com/vkasraj/create-node-app/issues"
     },
-    "homepage": "https://github.com/vkasraj/create-node-app#readme"
+    "homepage": "https://github.com/vkasraj/create-node-app#readme",
+    "dependencies": {
+        "commander": "^2.19.0"
+    }
 }
