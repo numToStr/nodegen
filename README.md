@@ -1,11 +1,11 @@
-# create-node-app
+# nodegen
 
 A CLI tool for creating node app
 
 ## Installation
 
 ```sh
-$ npm install -g @realvikas/create-node-app
+$ npm install -g @realvikas/nodegen
 ```
 
 ## Quick Start
@@ -13,5 +13,5 @@ $ npm install -g @realvikas/create-node-app
 Create the app:
 
 ```bash
-$ create-node-app init <dir>
+$ nodegen init <dir>
 ```
