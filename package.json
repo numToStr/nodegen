@@ -15,7 +15,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/vkasraj/create-node-app.git"
+        "url": "git+https://github.com/vkasraj/nodegen.git"
     },
     "keywords": [
         "node",
@@ -26,9 +26,9 @@
     "author": "Vikas Raj <vikasraj1911@gmail.com>",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/vkasraj/create-node-app/issues"
+        "url": "https://github.com/vkasraj/nodegen/issues"
     },
-    "homepage": "https://github.com/vkasraj/create-node-app#readme",
+    "homepage": "https://github.com/vkasraj/nodegen#readme",
     "dependencies": {
         "commander": "^2.19.0"
     }
