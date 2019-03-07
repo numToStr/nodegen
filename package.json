@@ -1,6 +1,6 @@
 {
     "name": "@realvikas/nodegen",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A CLI tool for creating node app",
     "main": "bin/www.js",
     "engines": {
