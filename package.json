@@ -1,5 +1,5 @@
 {
-    "name": "@realvikas/create-node-app",
+    "name": "@realvikas/nodegen",
     "version": "1.0.0",
     "description": "A CLI tool for creating node app",
     "main": "bin/www.js",
@@ -8,7 +8,7 @@
         "npm": ">=6.7.0"
     },
     "bin": {
-        "create-node-app": "bin/www.js"
+        "nodegen": "bin/www.js"
     },
     "scripts": {
         "start": "node bin/www.js"
