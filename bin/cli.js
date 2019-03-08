@@ -15,48 +15,8 @@ const main = (dir, cmd) => {
     // Creating Entry Folder
     mkdir(appName, ".");
 
-    // Creating bin dir
-    mkdir(appName, "bin");
+    // Copying template files
     copyTemplateMulti({
-        from: "bin",
-        to: `${appName}/bin`
-    });
-
-    // Creating config dir
-    mkdir(appName, "config");
-    copyTemplateMulti({
-        from: "config",
-        to: `${appName}/config`
-    });
-
-    mkdir(appName, "app");
-    copyTemplateMulti({
-        from: "app",
-        to: `${appName}/app`
-    });
-
-    mkdir(appName, "src");
-    copyTemplateMulti({
-        from: "src",
-        to: `${appName}/src`
-    });
-
-    mkdir(appName, "utils");
-    copyTemplateMulti({
-        from: "utils",
-        to: `${appName}/utils`
-    });
-
-    // Copying env file
-    copyTemplate({
-        file: ".env",
-        from: ".",
-        to: appName
-    });
-
-    // Copying env file
-    copyTemplate({
-        file: ".gitignore",
         from: ".",
         to: appName
     });
@@ -139,8 +99,17 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
     }
 
     const filePath = path.join(TEMPLATE_DIR, from, file);
+
     fs.readFile(filePath, (err, data) => {
-        if (err && err.code === "EISDIR") {
+        if (err) {
+            if (err.code !== "EISDIR") {
+                throw err;
+            }
+
+            if (file === "misc" || file === "node_modules") {
+                return;
+            }
+
             mkdir(to, file);
             return copyTemplateMulti({
                 from: `${from}/${file}`,
