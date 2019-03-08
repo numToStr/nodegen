@@ -15,3 +15,26 @@ Create the app:
 ```bash
 $ nodegen init <dir>
 ```
+
+## Generated Project Structure
+
+```bash
+> bin
+    - www.js
+> src
+    - server.js
+> config
+    - keys.js
+> app
+    > {component}
+        - {component}.controllers.js
+        - {component}.dals.js
+        - {component}.model.js
+        - {component}.routes.js
+    - app.js
+.env
+.gitignore
+LICENSE
+README.md
+package.json
+```
