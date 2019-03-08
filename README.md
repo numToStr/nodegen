@@ -28,8 +28,6 @@ $ nodegen init <dir>
 > app
     > {component}
         - {component}.controllers.js
-        - {component}.dals.js
-        - {component}.model.js
         - {component}.routes.js
     - app.js
 .env
