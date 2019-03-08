@@ -2,16 +2,16 @@
     "name": "@realvikas/nodegen",
     "version": "1.2.0",
     "description": "A CLI tool for creating node app",
-    "main": "bin/www.js",
+    "main": "bin/cli.js",
     "engines": {
         "node": ">=10.15.0",
         "npm": ">=6.7.0"
     },
     "bin": {
-        "nodegen": "bin/www.js"
+        "nodegen": "bin/cli.js"
     },
     "scripts": {
-        "start": "node bin/www.js"
+        "start": "node bin/cli.js"
     },
     "repository": {
         "type": "git",
