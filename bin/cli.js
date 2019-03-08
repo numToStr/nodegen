@@ -33,6 +33,22 @@ const main = (dir, cmd) => {
             ["<app:author>", "Vikas Raj"]
         ]
     });
+
+    // Copying and parsing .env
+    copyTemplate({
+        file: ".env",
+        from: ".",
+        to: appName,
+        parse: true
+    });
+
+    // Copying and parsing .gitignore
+    copyTemplate({
+        file: ".gitignore",
+        from: ".",
+        to: appName,
+        parse: true
+    });
 };
 
 program
@@ -87,13 +103,15 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
     // write files to dest dir
     const destPath = path.join(to, file);
 
-    if (parse === true && variables.length > 0) {
+    if (parse === true) {
         const _filePath = path.join(TEMPLATE_DIR, from, `misc/${file}.txt`);
         let parsed = fs.readFileSync(_filePath).toString(CHAR_ENC);
 
-        variables.forEach(([key, value]) => {
-            parsed = parsed.replace(new RegExp(key, "g"), value);
-        });
+        if (variables.length > 0) {
+            variables.forEach(([key, value]) => {
+                parsed = parsed.replace(new RegExp(key, "g"), value);
+            });
+        }
 
         return write(parsed, destPath, CHAR_ENC);
     }
