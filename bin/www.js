@@ -8,20 +8,39 @@ const { version } = require("../package.json");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
 
+const main = (dir = "hello-world", cmd) => {
+    const appName = createAppName(dir);
+
+    // Creating Entry Folder
+    mkdir(appName, ".");
+
+    // Creating bin dir
+    mkdir(appName, "bin");
+    copyTemplateMulti({
+        from: "bin",
+        to: `${appName}/bin`
+    });
+
+    // Creating config dir
+    mkdir(appName, "config");
+    copyTemplateMulti({
+        from: "config",
+        to: `${appName}/config`
+    });
+
+    copyTemplate({
+        file: ".env",
+        from: ".",
+        to: appName
+    });
+};
+
 program
     .version(version, "-v, --version")
     .command("init <dir>")
     .description("Initialize project directory")
-    .option("-r, --recursive", "Remove recursively")
-    .action((dir, cmd) => {
-        mkdir(".", dir);
-        mkdir(dir, "bin");
-
-        copyTemplateMulti({
-            from: "bin",
-            to: `${dir}/bin`
-        });
-    });
+    // .option("-r, --recursive", "Remove recursively")
+    .action(main);
 
 program.parse(process.argv);
 
@@ -41,7 +60,7 @@ function mkdir(base, dir) {
  * Copy multiple files from template directory.
  */
 
-function copyTemplateMulti({ from, to, nameGlob }) {
+function copyTemplateMulti({ from, to, glob }) {
     const binDir = path.join(TEMPLATE_DIR, from);
 
     fs.readdir(binDir, { encoding: "utf8" }, (err, files) => {
@@ -90,4 +109,26 @@ function copyTemplate({ file, from, to }) {
 function write(content, fileName) {
     fs.writeFileSync(fileName, content);
     console.log("> \x1b[36mcreated\x1b[0m : " + fileName);
+}
+
+function createAppName(pathName) {
+    return path
+        .basename(pathName)
+        .replace(/[^A-Za-z0-9.-]+/g, "-")
+        .replace(/^[-_.]+|-+$/g, "")
+        .toLowerCase();
+}
+
+/**
+ * Check if the given directory `dir` is empty.
+ *
+ * @param {String} dir
+ * @param {Function} fn
+ */
+
+function emptyDirectory(dir, fn) {
+    fs.readdir(dir, function(err, files) {
+        if (err && err.code !== "ENOENT") throw err;
+        fn(!files || !files.length);
+    });
 }
