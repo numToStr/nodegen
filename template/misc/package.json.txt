@@ -1,15 +1,21 @@
 {
-    "name": "template",
+    "name": "<app:name>",
     "version": "0.0.1",
-    "description": "",
+    "description": "<app:description>",
     "main": "bin/www.js",
     "bin": "bin/www.js",
     "scripts": {
         "start": "node bin/www.js",
         "dev": "nodemon -r dotenv/config bin/www.js"
     },
-    "keywords": [],
-    "author": "",
+    "keywords": [
+        "nodegen",
+        "node",
+        "server",
+        "rest",
+        "api"
+    ],
+    "author": "<app:author>",
     "license": "MIT",
     "devDependencies": {
         "dotenv": "latest",

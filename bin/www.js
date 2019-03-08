@@ -7,8 +7,9 @@ const program = require("commander");
 const { version } = require("../package.json");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
+const CHAR_ENC = "utf-8";
 
-const main = (dir = "hello-world", cmd) => {
+const main = (dir, cmd) => {
     const appName = createAppName(dir);
 
     // Creating Entry Folder
@@ -28,10 +29,24 @@ const main = (dir = "hello-world", cmd) => {
         to: `${appName}/config`
     });
 
+    // Copying env file
     copyTemplate({
         file: ".env",
         from: ".",
         to: appName
+    });
+
+    // Copying and parsing package json
+    copyTemplate({
+        file: "package.json",
+        from: ".",
+        to: appName,
+        parse: true,
+        variables: [
+            ["<app:name>", appName],
+            ["<app:description>", "Something special"],
+            ["<app:author>", "Vikas Raj"]
+        ]
     });
 };
 
@@ -60,10 +75,10 @@ function mkdir(base, dir) {
  * Copy multiple files from template directory.
  */
 
-function copyTemplateMulti({ from, to, glob }) {
-    const binDir = path.join(TEMPLATE_DIR, from);
+function copyTemplateMulti({ from, to }) {
+    const sourceDir = path.join(TEMPLATE_DIR, from);
 
-    fs.readdir(binDir, { encoding: "utf8" }, (err, files) => {
+    fs.readdir(sourceDir, { encoding: CHAR_ENC }, (err, files) => {
         if (err) {
             throw err;
         }
@@ -76,27 +91,32 @@ function copyTemplateMulti({ from, to, glob }) {
             });
         });
     });
-
-    // fs.readdirSync(path.join(TEMPLATE_DIR, fromDir))
-    //     .filter(minimatch.filter(nameGlob, { matchBase: true }))
-    //     .forEach(function(name) {
-    //         copyTemplate(path.join(fromDir, name), path.join(toDir, name));
-    //     });
 }
 
 /**
  * Copy file from template directory.
  */
-function copyTemplate({ file, from, to }) {
+function copyTemplate({ file, from, to, parse = false, variables = [] }) {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
-    const filesPath = path.join(TEMPLATE_DIR, from, file);
-    const content = fs.readFileSync(filesPath);
-
     const destPath = path.join(to, file);
 
-    write(content, destPath, "utf-8");
+    if (parse === true && variables.length > 0) {
+        const _filePath = path.join(TEMPLATE_DIR, from, `misc/${file}.txt`);
+        let parsed = fs.readFileSync(_filePath).toString(CHAR_ENC);
+
+        variables.forEach(([key, value]) => {
+            parsed = parsed.replace(new RegExp(key, "g"), value);
+        });
+
+        return write(parsed, destPath, CHAR_ENC);
+    }
+
+    const filePath = path.join(TEMPLATE_DIR, from, file);
+    const content = fs.readFileSync(filePath);
+
+    write(content, destPath, CHAR_ENC);
 }
 
 /**
