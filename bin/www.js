@@ -36,6 +36,13 @@ const main = (dir, cmd) => {
         to: appName
     });
 
+    // Copying env file
+    copyTemplate({
+        file: ".gitignore",
+        from: ".",
+        to: appName
+    });
+
     // Copying and parsing package json
     copyTemplate({
         file: "package.json",
