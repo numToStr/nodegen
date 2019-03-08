@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 const http = require("http");
+const router = require("../src/server");
 const { PORT } = require("../config/keys");
 
 // Creating the node server
-const SERVER = http.createServer();
+const SERVER = http.createServer(router);
 
 // Firing up the server on selected port
 SERVER.listen(PORT);

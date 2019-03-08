@@ -17,6 +17,9 @@
     ],
     "author": "<app:author>",
     "license": "MIT",
+    "dependencies": {
+        "express": "latest"
+    },
     "devDependencies": {
         "dotenv": "latest",
         "nodemon": "latest"
