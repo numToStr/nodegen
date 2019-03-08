@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
 const http = require("http");
-
-// Port Environment variable
-const PORT = process.env.PORT || 8080;
+const { PORT } = require("../config/keys");
 
 // Creating the node server
 const SERVER = http.createServer();
