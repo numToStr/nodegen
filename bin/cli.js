@@ -29,6 +29,24 @@ const main = (dir, cmd) => {
         to: `${appName}/config`
     });
 
+    mkdir(appName, "app");
+    copyTemplateMulti({
+        from: "app",
+        to: `${appName}/app`
+    });
+
+    mkdir(appName, "src");
+    copyTemplateMulti({
+        from: "src",
+        to: `${appName}/src`
+    });
+
+    mkdir(appName, "utils");
+    copyTemplateMulti({
+        from: "utils",
+        to: `${appName}/utils`
+    });
+
     // Copying env file
     copyTemplate({
         file: ".env",
@@ -121,9 +139,17 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
     }
 
     const filePath = path.join(TEMPLATE_DIR, from, file);
-    const content = fs.readFileSync(filePath);
+    fs.readFile(filePath, (err, data) => {
+        if (err && err.code === "EISDIR") {
+            mkdir(to, file);
+            return copyTemplateMulti({
+                from: `${from}/${file}`,
+                to: `${to}/${file}`
+            });
+        }
 
-    write(content, destPath, CHAR_ENC);
+        write(data, destPath, CHAR_ENC);
+    });
 }
 
 /**
