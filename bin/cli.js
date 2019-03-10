@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const inquirer = require("inquirer");
+const ejs = require("ejs");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
 const CHAR_ENC = "utf-8";
@@ -47,11 +48,16 @@ const questions = [
     // Creating Entry Folder
     mkdir(appName, ".");
 
-    // Copying template files
-    copyTemplateMulti({
-        from: ".",
-        to: appName
-    });
+    // // Copying template files
+    // copyTemplateMulti({
+    //     from: ".",
+    //     to: appName
+    // });
+
+    const locals = {
+        ...answers,
+        projectName: appName
+    }
 
     // Copying and parsing package json
     copyTemplate({
@@ -59,11 +65,7 @@ const questions = [
         from: ".",
         to: appName,
         parse: true,
-        variables: [
-            ["<app:name>", appName],
-            ["<app:description>", answers.projectDescription],
-            ["<app:author>", answers.authorName]
-        ]
+        locals
     });
 
     // Copying and parsing License
@@ -72,24 +74,24 @@ const questions = [
         from: ".",
         to: appName,
         parse: true,
-        variables: [["<app:author>", answers.authorName]]
+        locals
     });
 
-    // Copying and parsing .env
-    copyTemplate({
-        file: ".env",
-        from: ".",
-        to: appName,
-        parse: true
-    });
+    // // Copying and parsing .env
+    // copyTemplate({
+    //     file: ".env",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true
+    // });
 
-    // Copying and parsing .gitignore
-    copyTemplate({
-        file: ".gitignore",
-        from: ".",
-        to: appName,
-        parse: true
-    });
+    // // Copying and parsing .gitignore
+    // copyTemplate({
+    //     file: ".gitignore",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true
+    // });
 })();
 
 function createAppName(pathName) {
@@ -137,21 +139,14 @@ function copyTemplateMulti({ from, to }) {
 /**
  * Copy file from template directory.
  */
-function copyTemplate({ file, from, to, parse = false, variables = [] }) {
+function copyTemplate({ file, from, to, parse = false, locals = {} }) {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
     const destPath = path.join(to, file);
 
     if (parse === true) {
-        const _filePath = path.join(TEMPLATE_DIR, from, `misc/${file}.txt`);
-        let parsed = fs.readFileSync(_filePath).toString(CHAR_ENC);
-
-        if (variables.length > 0) {
-            variables.forEach(([key, value]) => {
-                parsed = parsed.replace(new RegExp(key, "g"), value);
-            });
-        }
+        const parsed = loadTemplate({ from, file, locals });
 
         return write(parsed, destPath, CHAR_ENC);
     }
@@ -189,4 +184,15 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
 function write(content, fileName) {
     fs.writeFileSync(fileName, content);
     console.log("> \x1b[36mcreated\x1b[0m : " + fileName);
+}
+
+/**
+ * Load template file.
+ */
+
+function loadTemplate({ from, file, locals }) {
+    const _filePath = path.join(TEMPLATE_DIR, from, `${file}.ejs`);
+    const contents = fs.readFileSync(_filePath).toString(CHAR_ENC);
+
+    return ejs.render(contents, locals);
 }
