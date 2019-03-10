@@ -66,7 +66,7 @@ const mkdir = (base, dir) => {
  * Copy multiple files from template directory.
  */
 
-const copyMulti = ({ from, to }) => {
+const copyMulti = ({ from, to, locals }) => {
     const sourceDir = path.join(TEMPLATE_DIR, from);
 
     fs.readdir(sourceDir, { encoding: CHAR_ENC }, (err, files) => {
@@ -78,7 +78,8 @@ const copyMulti = ({ from, to }) => {
             copy({
                 file,
                 from,
-                to
+                to,
+                locals
             });
         });
     });
@@ -87,16 +88,25 @@ const copyMulti = ({ from, to }) => {
 /**
  * Copy file from template directory.
  */
-const copy = ({ file, from, to, parse = false, locals = {} }) => {
+const copy = ({ file, from, to, locals = {} }) => {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
     const destPath = path.join(to, file);
+    const isEjs = path.extname(file) === ".ejs";
 
-    if (parse === true) {
+    // Check if File of Folder
+    // If file => writeFile
+    // If file === .ejs => parse => writeFile
+    // If Folder => copy(params)
+
+    if (isEjs) {
+        const { name } = path.parse(destPath);
+        const newDestPath = path.join(to, name);
+
         const parsed = parseTemplate({ from, file, locals });
 
-        return writeFile(parsed, destPath, CHAR_ENC);
+        return writeFile(parsed, newDestPath, CHAR_ENC);
     }
 
     const filePath = path.join(TEMPLATE_DIR, from, file);
@@ -135,12 +145,12 @@ const writeFile = (content, fileName) => {
 };
 
 /**
- * Load template file.
+ * Parsing ejs template
  */
 
 const parseTemplate = ({ from, file, locals }) => {
-    const _filePath = path.join(TEMPLATE_DIR, from, `${file}.ejs`);
-    const contents = fs.readFileSync(_filePath).toString(CHAR_ENC);
+    const filePath = path.join(TEMPLATE_DIR, from, file);
+    const contents = fs.readFileSync(filePath).toString(CHAR_ENC);
 
     return ejs.render(contents, locals);
 };
@@ -154,33 +164,34 @@ const parseTemplate = ({ from, file, locals }) => {
     mkdir(appName, ".");
 
     // // Copying template files
-    // copyMulti({
-    //     from: ".",
-    //     to: appName
-    // });
-
     const locals = {
         ...answers,
         projectName: appName
     };
 
-    // Copying and parsing package json
-    copy({
-        file: "package.json",
+    copyMulti({
         from: ".",
         to: appName,
-        parse: true,
         locals
     });
 
-    // Copying and parsing License
-    copy({
-        file: "LICENSE",
-        from: ".",
-        to: appName,
-        parse: true,
-        locals
-    });
+    // Copying and parsing package json
+    // copy({
+    //     file: "package.json",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true,
+    //     locals
+    // });
+
+    // // Copying and parsing License
+    // copy({
+    //     file: "LICENSE",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true,
+    //     locals
+    // });
 
     // // Copying and parsing .env
     // copy({
