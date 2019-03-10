@@ -66,6 +66,15 @@ const questions = [
         ]
     });
 
+    // Copying and parsing License
+    copyTemplate({
+        file: "LICENSE",
+        from: ".",
+        to: appName,
+        parse: true,
+        variables: [["<app:author>", answers.authorName]]
+    });
+
     // Copying and parsing .env
     copyTemplate({
         file: ".env",
