@@ -124,7 +124,8 @@ const copy = ({ file, from, to, locals = {} }) => {
             mkdir(to, file);
             return copyMulti({
                 from: `${from}/${file}`,
-                to: `${to}/${file}`
+                to: `${to}/${file}`,
+                locals
             });
         }
 

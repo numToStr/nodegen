@@ -1,15 +1,26 @@
 #!/usr/bin/env node
 
 const http = require("http");
+<% if (isMongo) { %>const mongoose = require('mongoose');<% } %>
 const router = require("../src/server");
-const { PORT } = require("../config/keys");
+const { PORT, <% if (isMongo) { %>MONGO_URI<% } %> } = require("../config/keys");
 
 // Creating the node server
 const SERVER = http.createServer(router);
+<% if (isMongo) { %>
+mongoose.connect(MONGO_URI, (err) => {
+    if (err) {
+        throw err;
+    }
 
+    // Firing up the server on selected port
+    SERVER.listen(PORT);
+})
+<% } %>
+<% if (!isMongo) { %>
 // Firing up the server on selected port
 SERVER.listen(PORT);
-
+<% } %>
 SERVER.on("listening", () => {
     console.log("[Server]::LISTEN:%s", PORT);
 });
