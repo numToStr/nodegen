@@ -13,94 +13,42 @@ const questions = [
     {
         type: "input",
         name: "projectName",
-        message: "Project Name: ",
+        message: "Project Name:",
         default: "hello-world"
     },
     {
         type: "input",
         name: "projectDescription",
-        message: "Project Description: "
+        message: "Project Description:",
+        default: "Something special"
     },
     {
         type: "input",
         name: "authorName",
-        message: "Author Name: "
+        message: "Author Name:"
     },
     {
         type: "list",
         name: "frameworkType",
-        message: "Which framwork do you want to use? ",
+        message: "Which framwork do you want to use?",
         choices: ["express", "koa", "fastify"]
     },
     {
         type: "confirm",
         name: "isMongo",
-        message: "Include mongoDB/mongoose? ",
+        message: "Include mongoDB/mongoose?",
         default: "y"
     }
 ];
 
-(async () => {
-    const answers = await inquirer.prompt(questions);
-
-    const appName = createAppName(answers.projectName);
-
-    // Creating Entry Folder
-    mkdir(appName, ".");
-
-    // // Copying template files
-    // copyTemplateMulti({
-    //     from: ".",
-    //     to: appName
-    // });
-
-    const locals = {
-        ...answers,
-        projectName: appName
-    }
-
-    // Copying and parsing package json
-    copyTemplate({
-        file: "package.json",
-        from: ".",
-        to: appName,
-        parse: true,
-        locals
-    });
-
-    // Copying and parsing License
-    copyTemplate({
-        file: "LICENSE",
-        from: ".",
-        to: appName,
-        parse: true,
-        locals
-    });
-
-    // // Copying and parsing .env
-    // copyTemplate({
-    //     file: ".env",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true
-    // });
-
-    // // Copying and parsing .gitignore
-    // copyTemplate({
-    //     file: ".gitignore",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true
-    // });
-})();
-
-function createAppName(pathName) {
+// For sanitizing folder name
+const createAppName = pathName => {
     return path
         .basename(pathName)
         .replace(/[^A-Za-z0-9.-]+/g, "-")
         .replace(/^[-_.]+|-+$/g, "")
         .toLowerCase();
-}
+};
 
 /**
  * Make the given dir relative to base.
@@ -109,16 +57,16 @@ function createAppName(pathName) {
  * @param {string} dir
  */
 
-function mkdir(base, dir) {
+const mkdir = (base, dir) => {
     const dirPath = path.join(base, dir);
     fs.mkdirSync(dirPath);
-}
+};
 
 /**
  * Copy multiple files from template directory.
  */
 
-function copyTemplateMulti({ from, to }) {
+const copyMulti = ({ from, to }) => {
     const sourceDir = path.join(TEMPLATE_DIR, from);
 
     fs.readdir(sourceDir, { encoding: CHAR_ENC }, (err, files) => {
@@ -127,28 +75,28 @@ function copyTemplateMulti({ from, to }) {
         }
 
         files.forEach(file => {
-            copyTemplate({
+            copy({
                 file,
                 from,
                 to
             });
         });
     });
-}
+};
 
 /**
  * Copy file from template directory.
  */
-function copyTemplate({ file, from, to, parse = false, locals = {} }) {
+const copy = ({ file, from, to, parse = false, locals = {} }) => {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
     const destPath = path.join(to, file);
 
     if (parse === true) {
-        const parsed = loadTemplate({ from, file, locals });
+        const parsed = parseTemplate({ from, file, locals });
 
-        return write(parsed, destPath, CHAR_ENC);
+        return writeFile(parsed, destPath, CHAR_ENC);
     }
 
     const filePath = path.join(TEMPLATE_DIR, from, file);
@@ -164,15 +112,15 @@ function copyTemplate({ file, from, to, parse = false, locals = {} }) {
             }
 
             mkdir(to, file);
-            return copyTemplateMulti({
+            return copyMulti({
                 from: `${from}/${file}`,
                 to: `${to}/${file}`
             });
         }
 
-        write(data, destPath, CHAR_ENC);
+        writeFile(data, destPath, CHAR_ENC);
     });
-}
+};
 
 /**
  * For creating file onto the disk
@@ -181,18 +129,72 @@ function copyTemplate({ file, from, to, parse = false, locals = {} }) {
  * @param {String} context Content of the file to be written in new file
  */
 
-function write(content, fileName) {
+const writeFile = (content, fileName) => {
     fs.writeFileSync(fileName, content);
     console.log("> \x1b[36mcreated\x1b[0m : " + fileName);
-}
+};
 
 /**
  * Load template file.
  */
 
-function loadTemplate({ from, file, locals }) {
+const parseTemplate = ({ from, file, locals }) => {
     const _filePath = path.join(TEMPLATE_DIR, from, `${file}.ejs`);
     const contents = fs.readFileSync(_filePath).toString(CHAR_ENC);
 
     return ejs.render(contents, locals);
-}
+};
+
+(async () => {
+    const answers = await inquirer.prompt(questions);
+
+    const appName = createAppName(answers.projectName);
+
+    // Creating Entry Folder
+    mkdir(appName, ".");
+
+    // // Copying template files
+    // copyMulti({
+    //     from: ".",
+    //     to: appName
+    // });
+
+    const locals = {
+        ...answers,
+        projectName: appName
+    };
+
+    // Copying and parsing package json
+    copy({
+        file: "package.json",
+        from: ".",
+        to: appName,
+        parse: true,
+        locals
+    });
+
+    // Copying and parsing License
+    copy({
+        file: "LICENSE",
+        from: ".",
+        to: appName,
+        parse: true,
+        locals
+    });
+
+    // // Copying and parsing .env
+    // copy({
+    //     file: ".env",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true
+    // });
+
+    // // Copying and parsing .gitignore
+    // copy({
+    //     file: ".gitignore",
+    //     from: ".",
+    //     to: appName,
+    //     parse: true
+    // });
+})();
