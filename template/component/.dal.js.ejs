@@ -1,0 +1,15 @@
+const <%- caps = initialComponent.charAt(0).toUpperCase() + initialComponent.slice(1) -%>Model = require('./<%- initialComponent -%>.model.js');
+
+class <%- caps -%>DAL {
+  constructor (ctx = {}) {
+    this.ctx = ctx;
+  }
+}
+
+<%- caps -%>DAL.prototype.create = async function create(data) {
+  const newDoc = await new <%- caps -%>Model(data).save();
+
+  return newDoc.toObject();
+}
+
+module.exports = <%- caps -%>DAL;
