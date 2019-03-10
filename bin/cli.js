@@ -27,12 +27,12 @@ const questions = [
         name: "authorName",
         message: "Author Name:"
     },
-    {
-        type: "list",
-        name: "frameworkType",
-        message: "Which framwork do you want to use?",
-        choices: ["express", "koa", "fastify"]
-    },
+    // {
+    //     type: "list",
+    //     name: "frameworkType",
+    //     message: "Which framwork do you want to use?",
+    //     choices: ["express", "koa", "fastify"]
+    // },
     {
         type: "confirm",
         name: "isMongo",
