@@ -3,46 +3,14 @@
 
 const fs = require("fs");
 const path = require("path");
-const inquirer = require("inquirer");
+const program = require("commander");
+const { version } = require("../package.json");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
 const CHAR_ENC = "utf-8";
 
-const questions = [
-    {
-        type: "input",
-        name: "projectName",
-        message: "Project Name: ",
-        default: "hello-world"
-    },
-    {
-        type: "input",
-        name: "projectDescription",
-        message: "Project Description: "
-    },
-    {
-        type: "input",
-        name: "authorName",
-        message: "Author Name: "
-    },
-    {
-        type: "list",
-        name: "frameworkType",
-        message: "Which framwork do you want to use? ",
-        choices: ["express", "koa", "fastify"]
-    },
-    {
-        type: "confirm",
-        name: "isMongo",
-        message: "Include mongoDB/mongoose? ",
-        default: "y"
-    }
-];
-
-(async () => {
-    const answers = await inquirer.prompt(questions);
-
-    const appName = createAppName(answers.projectName);
+const main = (dir, cmd) => {
+    const appName = createAppName(dir);
 
     // Creating Entry Folder
     mkdir(appName, ".");
@@ -61,8 +29,8 @@ const questions = [
         parse: true,
         variables: [
             ["<app:name>", appName],
-            ["<app:description>", answers.projectDescription],
-            ["<app:author>", answers.authorName]
+            ["<app:description>", "Something special"],
+            ["<app:author>", "Vikas Raj"]
         ]
     });
 
@@ -81,15 +49,16 @@ const questions = [
         to: appName,
         parse: true
     });
-})();
+};
 
-function createAppName(pathName) {
-    return path
-        .basename(pathName)
-        .replace(/[^A-Za-z0-9.-]+/g, "-")
-        .replace(/^[-_.]+|-+$/g, "")
-        .toLowerCase();
-}
+program
+    .version(version, "-v, --version")
+    .command("init <dir>")
+    .description("Initialize project directory")
+    // .option("-r, --recursive", "Remove recursively")
+    .action(main);
+
+program.parse(process.argv);
 
 /**
  * Make the given dir relative to base.
@@ -180,4 +149,26 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
 function write(content, fileName) {
     fs.writeFileSync(fileName, content);
     console.log("> \x1b[36mcreated\x1b[0m : " + fileName);
+}
+
+function createAppName(pathName) {
+    return path
+        .basename(pathName)
+        .replace(/[^A-Za-z0-9.-]+/g, "-")
+        .replace(/^[-_.]+|-+$/g, "")
+        .toLowerCase();
+}
+
+/**
+ * Check if the given directory `dir` is empty.
+ *
+ * @param {String} dir
+ * @param {Function} fn
+ */
+
+function emptyDirectory(dir, fn) {
+    fs.readdir(dir, function(err, files) {
+        if (err && err.code !== "ENOENT") throw err;
+        fn(!files || !files.length);
+    });
 }
