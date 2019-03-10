@@ -18,7 +18,8 @@
     "author": "<%- authorName -%>",
     "license": "MIT",
     "dependencies": {
-        "express": "latest"
+        "express": "latest"<% if (isMongo) { %>,
+        "mongoose": "latest"<% } %>
     },
     "devDependencies": {
         "dotenv": "latest",
