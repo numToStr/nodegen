@@ -40,9 +40,9 @@ const questions = [
         default: "y"
     },
     {
-        type: 'input',
-        name: 'initialComponent',
-        message: 'Name of the initial component:',
+        type: "input",
+        name: "initialComponent",
+        message: "Name of the initial component:",
         default: "user"
     }
 ];
@@ -72,7 +72,7 @@ const mkdir = (base, dir) => {
  * Copy multiple files from template directory.
  */
 
-const copyMulti = ({ from, to, locals }) => {
+const copyMulti = ({ from, to, locals, appendName = "" }) => {
     const sourceDir = path.join(TEMPLATE_DIR, from);
 
     fs.readdir(sourceDir, { encoding: CHAR_ENC }, (err, files) => {
@@ -85,7 +85,8 @@ const copyMulti = ({ from, to, locals }) => {
                 file,
                 from,
                 to,
-                locals
+                locals,
+                appendName
             });
         });
     });
@@ -94,7 +95,7 @@ const copyMulti = ({ from, to, locals }) => {
 /**
  * Copy file from template directory.
  */
-const copy = ({ file, from, to, locals = {} }) => {
+const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
@@ -108,7 +109,7 @@ const copy = ({ file, from, to, locals = {} }) => {
 
     if (isEjs) {
         const { name } = path.parse(destPath);
-        const newDestPath = path.join(to, name);
+        const newDestPath = path.join(to, `${appendName}${name}`);
 
         const parsed = parseTemplate({ from, file, locals });
 
@@ -123,8 +124,16 @@ const copy = ({ file, from, to, locals = {} }) => {
                 throw err;
             }
 
-            if (file === "misc" || file === "node_modules") {
-                return;
+            if (file === "component") {
+                const newTo = `app/${locals.initialComponent}`;
+
+                mkdir(to, newTo);
+                return copyMulti({
+                    from: `${from}/${file}`,
+                    to: `${to}/${newTo}`,
+                    locals,
+                    appendName: locals.initialComponent
+                });
             }
 
             mkdir(to, file);
