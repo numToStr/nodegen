@@ -38,6 +38,12 @@ const questions = [
         name: "isMongo",
         message: "Include mongoDB/mongoose?",
         default: "y"
+    },
+    {
+        type: 'input',
+        name: 'initialComponent',
+        message: 'Name of the initial component:',
+        default: "user"
     }
 ];
 
