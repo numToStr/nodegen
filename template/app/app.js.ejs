@@ -1,0 +1,7 @@
+const router = require("express").Router();
+
+const <%- initialComponent -%> = require("./<%- initialComponent -%>/<%- initialComponent -%>.routes");
+
+router.use("/<%- initialComponent -%>", <%- initialComponent -%>);
+
+module.exports = router;
