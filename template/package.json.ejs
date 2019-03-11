@@ -22,7 +22,9 @@
         "mongoose": "latest"<% } %>
     },
     "devDependencies": {
-        "dotenv": "latest",
-        "nodemon": "latest"
+        "nodemon": "latest",
+        "dotenv": "latest"<% if (isEslint) { %>,
+        "eslint": "latest",
+        "eslint-plugin-node": "latest"<% } %>
     }
 }
