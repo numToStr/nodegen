@@ -43,7 +43,13 @@ const questions = [
         type: "input",
         name: "initialComponent",
         message: "Name of the initial component:",
-        default: "user"
+        default: "dummy"
+    },
+    {
+        type: "confirm",
+        name: "isEslint",
+        message: "Include eslint?",
+        default: "y"
     }
 ];
 
@@ -99,8 +105,16 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
+
     const destPath = path.join(to, file);
+    const { name } = path.parse(destPath);
+
     const isEjs = path.extname(file) === ".ejs";
+    const isEslintFile = /eslint/.test(name);
+
+    if (!locals.isEslint && isEslintFile) {
+        return;
+    }
 
     // Check if File of Folder
     // If file => writeFile
@@ -108,7 +122,6 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     // If Folder => copy(params)
 
     if (isEjs) {
-        const { name } = path.parse(destPath);
         const newDestPath = path.join(to, `${appendName}${name}`);
 
         const parsed = parseTemplate({ from, file, locals });
