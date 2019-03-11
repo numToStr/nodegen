@@ -3,62 +3,64 @@
 
 const fs = require("fs");
 const path = require("path");
-const program = require("commander");
-const { version } = require("../package.json");
+const inquirer = require("inquirer");
+const ejs = require("ejs");
 
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
 const CHAR_ENC = "utf-8";
 
-const main = (dir, cmd) => {
-    const appName = createAppName(dir);
+const questions = [
+    {
+        type: "input",
+        name: "projectName",
+        message: "Project Name:",
+        default: "hello-world"
+    },
+    {
+        type: "input",
+        name: "projectDescription",
+        message: "Project Description:",
+        default: "Something special"
+    },
+    {
+        type: "input",
+        name: "authorName",
+        message: "Author Name:"
+    },
+    // {
+    //     type: "list",
+    //     name: "frameworkType",
+    //     message: "Which framwork do you want to use?",
+    //     choices: ["express", "koa", "fastify"]
+    // },
+    {
+        type: "confirm",
+        name: "isMongo",
+        message: "Include mongoDB/mongoose?",
+        default: "y"
+    },
+    {
+        type: "input",
+        name: "initialComponent",
+        message: "Name of the initial component:",
+        default: "dummy"
+    },
+    {
+        type: "confirm",
+        name: "isEslint",
+        message: "Include eslint?",
+        default: "y"
+    }
+];
 
-    // Creating Entry Folder
-    mkdir(appName, ".");
-
-    // Copying template files
-    copyTemplateMulti({
-        from: ".",
-        to: appName
-    });
-
-    // Copying and parsing package json
-    copyTemplate({
-        file: "package.json",
-        from: ".",
-        to: appName,
-        parse: true,
-        variables: [
-            ["<app:name>", appName],
-            ["<app:description>", "Something special"],
-            ["<app:author>", "Vikas Raj"]
-        ]
-    });
-
-    // Copying and parsing .env
-    copyTemplate({
-        file: ".env",
-        from: ".",
-        to: appName,
-        parse: true
-    });
-
-    // Copying and parsing .gitignore
-    copyTemplate({
-        file: ".gitignore",
-        from: ".",
-        to: appName,
-        parse: true
-    });
+// For sanitizing folder name
+const createAppName = pathName => {
+    return path
+        .basename(pathName)
+        .replace(/[^A-Za-z0-9.-]+/g, "-")
+        .replace(/^[-_.]+|-+$/g, "")
+        .toLowerCase();
 };
-
-program
-    .version(version, "-v, --version")
-    .command("init <dir>")
-    .description("Initialize project directory")
-    // .option("-r, --recursive", "Remove recursively")
-    .action(main);
-
-program.parse(process.argv);
 
 /**
  * Make the given dir relative to base.
@@ -67,16 +69,16 @@ program.parse(process.argv);
  * @param {string} dir
  */
 
-function mkdir(base, dir) {
+const mkdir = (base, dir) => {
     const dirPath = path.join(base, dir);
     fs.mkdirSync(dirPath);
-}
+};
 
 /**
  * Copy multiple files from template directory.
  */
 
-function copyTemplateMulti({ from, to }) {
+const copyMulti = ({ from, to, locals, appendName = "" }) => {
     const sourceDir = path.join(TEMPLATE_DIR, from);
 
     fs.readdir(sourceDir, { encoding: CHAR_ENC }, (err, files) => {
@@ -85,35 +87,50 @@ function copyTemplateMulti({ from, to }) {
         }
 
         files.forEach(file => {
-            copyTemplate({
+            copy({
                 file,
                 from,
-                to
+                to,
+                locals,
+                appendName
             });
         });
     });
-}
+};
 
 /**
  * Copy file from template directory.
  */
-function copyTemplate({ file, from, to, parse = false, variables = [] }) {
+const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     // Make dest directory
     // Read files from source dir
     // write files to dest dir
+
     const destPath = path.join(to, file);
+    const { name } = path.parse(destPath);
 
-    if (parse === true) {
-        const _filePath = path.join(TEMPLATE_DIR, from, `misc/${file}.txt`);
-        let parsed = fs.readFileSync(_filePath).toString(CHAR_ENC);
+    const isEslintFile = /eslint/.test(name);
+    if (!locals.isEslint && isEslintFile) {
+        return;
+    }
 
-        if (variables.length > 0) {
-            variables.forEach(([key, value]) => {
-                parsed = parsed.replace(new RegExp(key, "g"), value);
-            });
-        }
+    const isMongoFile = /(\.model|\.dal)/.test(name);
+    if (!locals.isMongo && isMongoFile) {
+        return;
+    }
 
-        return write(parsed, destPath, CHAR_ENC);
+    // Check if File of Folder
+    // If file => writeFile
+    // If file === .ejs => parse => writeFile
+    // If Folder => copy(params)
+
+    const isEjs = path.extname(file) === ".ejs";
+    if (isEjs) {
+        const newDestPath = path.join(to, `${appendName}${name}`);
+
+        const parsed = parseTemplate({ from, file, locals });
+
+        return writeFile(parsed, newDestPath, CHAR_ENC);
     }
 
     const filePath = path.join(TEMPLATE_DIR, from, file);
@@ -124,20 +141,29 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
                 throw err;
             }
 
-            if (file === "misc" || file === "node_modules") {
-                return;
+            if (file === "component") {
+                const newTo = `app/${locals.initialComponent}`;
+
+                mkdir(to, newTo);
+                return copyMulti({
+                    from: `${from}/${file}`,
+                    to: `${to}/${newTo}`,
+                    locals,
+                    appendName: locals.initialComponent
+                });
             }
 
             mkdir(to, file);
-            return copyTemplateMulti({
+            return copyMulti({
                 from: `${from}/${file}`,
-                to: `${to}/${file}`
+                to: `${to}/${file}`,
+                locals
             });
         }
 
-        write(data, destPath, CHAR_ENC);
+        writeFile(data, destPath, CHAR_ENC);
     });
-}
+};
 
 /**
  * For creating file onto the disk
@@ -146,29 +172,39 @@ function copyTemplate({ file, from, to, parse = false, variables = [] }) {
  * @param {String} context Content of the file to be written in new file
  */
 
-function write(content, fileName) {
+const writeFile = (content, fileName) => {
     fs.writeFileSync(fileName, content);
     console.log("> \x1b[36mcreated\x1b[0m : " + fileName);
-}
-
-function createAppName(pathName) {
-    return path
-        .basename(pathName)
-        .replace(/[^A-Za-z0-9.-]+/g, "-")
-        .replace(/^[-_.]+|-+$/g, "")
-        .toLowerCase();
-}
+};
 
 /**
- * Check if the given directory `dir` is empty.
- *
- * @param {String} dir
- * @param {Function} fn
+ * Parsing ejs template
  */
 
-function emptyDirectory(dir, fn) {
-    fs.readdir(dir, function(err, files) {
-        if (err && err.code !== "ENOENT") throw err;
-        fn(!files || !files.length);
+const parseTemplate = ({ from, file, locals }) => {
+    const filePath = path.join(TEMPLATE_DIR, from, file);
+    const contents = fs.readFileSync(filePath).toString(CHAR_ENC);
+
+    return ejs.render(contents, locals);
+};
+
+(async () => {
+    const answers = await inquirer.prompt(questions);
+
+    const appName = createAppName(answers.projectName);
+
+    // Creating Entry Folder
+    mkdir(appName, ".");
+
+    // // Copying template files
+    const locals = {
+        ...answers,
+        projectName: appName
+    };
+
+    copyMulti({
+        from: ".",
+        to: appName,
+        locals
     });
-}
+})();

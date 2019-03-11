@@ -1,7 +1,7 @@
 {
-    "name": "<app:name>",
+    "name": "<%- projectName -%>",
     "version": "0.0.1",
-    "description": "<app:description>",
+    "description": "<%- projectDescription -%>",
     "main": "bin/www.js",
     "bin": "bin/www.js",
     "scripts": {
@@ -15,13 +15,16 @@
         "rest",
         "api"
     ],
-    "author": "<app:author>",
+    "author": "<%- authorName -%>",
     "license": "MIT",
     "dependencies": {
-        "express": "latest"
+        "express": "latest"<% if (isMongo) { %>,
+        "mongoose": "latest"<% } %>
     },
     "devDependencies": {
-        "dotenv": "latest",
-        "nodemon": "latest"
+        "nodemon": "latest",
+        "dotenv": "latest"<% if (isEslint) { %>,
+        "eslint": "latest",
+        "eslint-plugin-node": "latest"<% } %>
     }
 }

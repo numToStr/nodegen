@@ -1,0 +1,13 @@
+const { Schema, model } = require("mongoose");
+<% caps = initialComponent.charAt(0).toUpperCase() + initialComponent.slice(1) %>
+const schema<%- caps -%> = new Schema(
+    {
+
+    },
+    {
+        timestamps: true,
+        minimize: true
+    }
+);
+
+module.exports = model("<%- caps -%>", schema<%- caps -%>);
