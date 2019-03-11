@@ -109,10 +109,13 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     const destPath = path.join(to, file);
     const { name } = path.parse(destPath);
 
-    const isEjs = path.extname(file) === ".ejs";
     const isEslintFile = /eslint/.test(name);
-
     if (!locals.isEslint && isEslintFile) {
+        return;
+    }
+
+    const isMongoFile = /(\.model|\.dal)/.test(name);
+    if (!locals.isMongo && isMongoFile) {
         return;
     }
 
@@ -121,6 +124,7 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
     // If file === .ejs => parse => writeFile
     // If Folder => copy(params)
 
+    const isEjs = path.extname(file) === ".ejs";
     if (isEjs) {
         const newDestPath = path.join(to, `${appendName}${name}`);
 
@@ -203,38 +207,4 @@ const parseTemplate = ({ from, file, locals }) => {
         to: appName,
         locals
     });
-
-    // Copying and parsing package json
-    // copy({
-    //     file: "package.json",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true,
-    //     locals
-    // });
-
-    // // Copying and parsing License
-    // copy({
-    //     file: "LICENSE",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true,
-    //     locals
-    // });
-
-    // // Copying and parsing .env
-    // copy({
-    //     file: ".env",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true
-    // });
-
-    // // Copying and parsing .gitignore
-    // copy({
-    //     file: ".gitignore",
-    //     from: ".",
-    //     to: appName,
-    //     parse: true
-    // });
 })();
