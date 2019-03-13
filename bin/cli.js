@@ -193,18 +193,31 @@ const parseTemplate = ({ from, file, locals }) => {
 
     const appName = createAppName(answers.projectName);
 
-    // Creating Entry Folder
-    mkdir(appName, ".");
+    // Check if the file/dir exists in the current directory.
+    fs.access(appName, fs.constants.F_OK, err => {
+        if (err) {
+            // File doesn't not exists
+            if (err.code === "ENOENT") {
+                // Creating Entry Folder
+                mkdir(".", appName);
 
-    // // Copying template files
-    const locals = {
-        ...answers,
-        projectName: appName
-    };
+                // Copying template files
+                const locals = {
+                    ...answers,
+                    projectName: appName
+                };
 
-    copyMulti({
-        from: ".",
-        to: appName,
-        locals
+                return copyMulti({
+                    from: ".",
+                    to: appName,
+                    locals
+                });
+            }
+
+            throw err;
+        }
+
+        console.log(`\n ${appName} directory already exists.`);
+        process.exit(1);
     });
 })();
