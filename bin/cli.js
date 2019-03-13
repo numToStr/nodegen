@@ -3,9 +3,11 @@
 
 const fs = require("fs");
 const path = require("path");
+const program = require("commander");
 const inquirer = require("inquirer");
 const ejs = require("ejs");
 
+const { version } = require("../package.json");
 const TEMPLATE_DIR = path.join(__dirname, "..", "template");
 const CHAR_ENC = "utf-8";
 
@@ -188,7 +190,8 @@ const parseTemplate = ({ from, file, locals }) => {
     return ejs.render(contents, locals);
 };
 
-(async () => {
+// For Initialize Project
+const init = async () => {
     const answers = await inquirer.prompt(questions);
 
     const appName = createAppName(answers.projectName);
@@ -220,4 +223,13 @@ const parseTemplate = ({ from, file, locals }) => {
         console.log(`\n ${appName} directory already exists.`);
         process.exit(1);
     });
-})();
+};
+
+// Command: init
+program
+    .version(version, "-v, --version")
+    .command("init")
+    .description("Initialize project")
+    .action(init);
+
+program.parse(process.argv);

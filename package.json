@@ -30,6 +30,7 @@
     },
     "homepage": "https://github.com/vkasraj/nodegen#readme",
     "dependencies": {
+        "commander": "^2.19.0",
         "ejs": "^2.6.1",
         "inquirer": "^6.2.2"
     }
