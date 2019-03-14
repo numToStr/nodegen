@@ -1,7 +1,7 @@
 {
     "name": "@realvikas/nodegen",
     "version": "2.0.0-1.1",
-    "description": "A CLI tool for creating node app",
+    "description": "A CLI tool for creating nodejs app 🚀",
     "main": "bin/cli.js",
     "engines": {
         "node": ">=10.15.0",
@@ -19,6 +19,12 @@
     },
     "keywords": [
         "node",
+        "nodejs",
+        "dotenv",
+        "mongoose",
+        "mongodb",
+        "nosql",
+        "eslint",
         "cli",
         "terminal",
         "boilerplate"
