@@ -3,7 +3,7 @@
 const http = require("http");
 <% if (isMongo) { %>const mongoose = require('mongoose');<% } %>
 const router = require("../src/server");
-const { PORT, <% if (isMongo) { %>MONGO_URI<% } %> } = require("../config/keys");
+const { PORT<% if (isMongo) { %>, MONGO_URI<% } %> } = require("../config/keys");
 
 // Creating the node server
 const SERVER = http.createServer(router);
