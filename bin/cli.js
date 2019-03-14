@@ -76,6 +76,19 @@ const mkdir = (base, dir) => {
     fs.mkdirSync(dirPath);
 };
 
+// For only creating component
+const createComponent = ({ base = "app", component, from, to, locals }) => {
+    const newTo = `${base}/${component}`;
+
+    mkdir(to, newTo);
+    return copyMulti({
+        from: `${from}/component`,
+        to: `${to}/${newTo}`,
+        locals,
+        appendName: component
+    });
+};
+
 /**
  * Copy multiple files from template directory.
  */
@@ -144,14 +157,11 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
             }
 
             if (file === "component") {
-                const newTo = `app/${locals.initialComponent}`;
-
-                mkdir(to, newTo);
-                return copyMulti({
-                    from: `${from}/${file}`,
-                    to: `${to}/${newTo}`,
-                    locals,
-                    appendName: locals.initialComponent
+                return createComponent({
+                    component: locals.initialComponent,
+                    from,
+                    to,
+                    locals
                 });
             }
 
@@ -191,7 +201,21 @@ const parseTemplate = ({ from, file, locals }) => {
 };
 
 // For Initialize Project
-const init = async () => {
+const init = async ({ component, base }) => {
+    // If component args is set, then only creating component
+    if (component) {
+        return createComponent({
+            base,
+            component,
+            from: ".",
+            to: ".",
+            locals: {
+                initialComponent: component,
+                isMongo: true
+            }
+        });
+    }
+
     const answers = await inquirer.prompt(questions);
 
     const appName = createAppName(answers.projectName);
@@ -201,15 +225,15 @@ const init = async () => {
         if (err) {
             // File doesn't not exists
             if (err.code === "ENOENT") {
-                // Creating Entry Folder
-                mkdir(".", appName);
-
-                // Copying template files
                 const locals = {
                     ...answers,
                     projectName: appName
                 };
 
+                // Creating Entry Folder
+                mkdir(".", appName);
+
+                // Copying template files
                 return copyMulti({
                     from: ".",
                     to: appName,
@@ -230,6 +254,12 @@ program
     .version(version, "-v, --version")
     .command("init")
     .description("Initialize project")
+    .option("-c, --component <name>", "for creating app component")
+    .option(
+        "-b, --base [base]",
+        "sets base directory for creating component",
+        "app"
+    )
     .action(init);
 
 program.parse(process.argv);
