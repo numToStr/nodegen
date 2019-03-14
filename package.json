@@ -1,7 +1,7 @@
 {
     "name": "@realvikas/nodegen",
-    "version": "2.0.0-1.1",
-    "description": "A CLI tool for creating node app",
+    "version": "2.0.0-1.2",
+    "description": "A CLI tool for creating nodejs app 🚀",
     "main": "bin/cli.js",
     "engines": {
         "node": ">=10.15.0",
@@ -19,6 +19,12 @@
     },
     "keywords": [
         "node",
+        "nodejs",
+        "dotenv",
+        "mongoose",
+        "mongodb",
+        "nosql",
+        "eslint",
         "cli",
         "terminal",
         "boilerplate"
@@ -30,6 +36,7 @@
     },
     "homepage": "https://github.com/vkasraj/nodegen#readme",
     "dependencies": {
+        "commander": "^2.19.0",
         "ejs": "^2.6.1",
         "inquirer": "^6.2.2"
     }
