@@ -129,7 +129,7 @@ const copy = ({ file, from, to, locals = {}, appendName = "" }) => {
         return;
     }
 
-    const isMongoFile = /(\.model|\.dal)/.test(name);
+    const isMongoFile = /(\.model|\.dal|^db)/.test(name);
     if (!locals.isMongo && isMongoFile) {
         return;
     }
